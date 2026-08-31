@@ -1,0 +1,8 @@
+{
+  "extraPaths": [
+    "services/science-engine",
+    "services/science-engine/src",
+    "services/science-engine/.venv/lib/python3.14/site-packages",
+    "/opt/homebrew/lib/python3.14/site-packages"
+  ]
+}
