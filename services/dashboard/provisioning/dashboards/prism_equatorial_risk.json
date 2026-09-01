@@ -1,0 +1,35 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Equatorial Scintillation S4 Index Trend",
+      "type": "timeseries",
+      "datasource": "TimescaleDB-PRISM"
+    },
+    {
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "title": "Regional Ionospheric Risk Status Map",
+      "type": "geomap",
+      "datasource": "TimescaleDB-PRISM"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["space-weather", "ionosphere", "scintillation", "prism"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "PRISM — Equatorial Scintillation & Space Weather Risk",
+  "uid": "prism-risk-dash",
+  "version": 1
+}
