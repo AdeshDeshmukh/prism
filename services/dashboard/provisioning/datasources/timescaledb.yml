@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: TimescaleDB-PRISM
+    type: postgres
+    access: proxy
+    url: timescaledb:5432
+    user: ${POSTGRES_USER:-prism_user}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD:-prism_secure_password}
+    database: ${POSTGRES_DB:-prism_db}
+    jsonData:
+      sslmode: "disable"
+      postgresVersion: 1600
+      timescaledb: true

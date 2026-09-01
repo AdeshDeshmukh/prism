@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: prism-timescaledb
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-prism_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prism_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-prism_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      - ../db/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - prism-network
+
+  science-engine:
+    build:
+      context: ../services/science-engine
+      dockerfile: Dockerfile
+    container_name: prism-science-engine
+    environment:
+      - NOAA_SWPC_URL=${NOAA_SWPC_URL:-https://services.swpc.noaa.gov/json}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - timescaledb
+    networks:
+      - prism-network
+
+  alert-service:
+    build:
+      context: ../services/alert-service
+      dockerfile: Dockerfile
+    container_name: prism-alert-service
+    environment:
+      - SCIENCE_ENGINE_URL=http://science-engine:8000
+      - SMS_GATEWAY_API_KEY=${SMS_GATEWAY_API_KEY:-dev_key}
+    depends_on:
+      - science-engine
+      - timescaledb
+    networks:
+      - prism-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: prism-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin_prism_pass}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../services/dashboard/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - timescaledb
+    networks:
+      - prism-network
+
+volumes:
+  timescaledb_data:
+
+networks:
+  prism-network:
+    driver: bridge
