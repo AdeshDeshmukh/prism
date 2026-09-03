@@ -190,72 +190,61 @@ Where $I$ is the received GNSS signal intensity over a 60-second sampling interv
 
 ## 📡 REST API Reference
 
-The Science Engine exposes RESTful endpoints for real-time risk assessment:
+The Science Engine exposes RESTful endpoints for real-time risk assessment and AI predictive forecasting:
 
 | Endpoint | Method | Query Parameters | Description |
 | :--- | :--- | :--- | :--- |
 | `/health` | `GET` | None | Engine status & uptime check |
 | `/risk` | `GET` | `latitude` (float), `longitude` (float) | Computes real-time $S_4$ index and risk tier |
+| `/forecast` | `GET` | `latitude` (float), `longitude` (float) | **AI ML 3-Hour Predictive Scintillation Trajectory** with 95% CI |
+| `/telemetry/live` | `GET` | None | Live ingested solar wind & geomagnetic telemetry |
+| `/simulate/storm` | `GET` | `latitude` (float), `longitude` (float) | Full 6-hour Coronal Mass Ejection (CME) storm simulation |
 
-### Sample Response (`GET /risk?latitude=-1.2921&longitude=36.8219`)
+### Sample AI Forecast Response (`GET /forecast?latitude=-1.2921&longitude=36.8219`)
 
 ```json
 {
-  "latitude": -1.2921,
-  "longitude": 36.8219,
-  "s4_index": 0.58,
-  "risk_tier": "SEVERE",
-  "recommended_action": "High risk of GNSS carrier phase loss. Switch to inertial navigation backup.",
-  "timestamp": "2026-09-02T22:40:00Z"
+  "location": { "latitude": -1.2921, "longitude": 36.8219 },
+  "current_s4": 0.78,
+  "current_kp": 7.33,
+  "forecast_horizons": [
+    { "lead_time_hours": 1, "predicted_s4": 0.99, "predicted_risk_tier": "SEVERE", "warning_flag": true },
+    { "lead_time_hours": 2, "predicted_s4": 1.00, "predicted_risk_tier": "SEVERE", "warning_flag": true },
+    { "lead_time_hours": 3, "predicted_s4": 0.96, "predicted_risk_tier": "SEVERE", "warning_flag": true }
+  ],
+  "epb_formation_probability_percent": 65.5,
+  "primary_instability_driver": "Geomagnetic Storm Triggered (Southward IMF Bz Coupling)",
+  "actionable_guidance": "⚠️ HIGH RISK ALERT: S4 predicted to exceed 0.50 within 1–3 hours. Prepare to switch autonomous drones and RTK tractor systems to Inertial Navigation (INS) backup."
 }
 ```
 
 ---
 
-## 📂 Repository Structure
+## ⚡ Quick Demo (Interactive Storm Simulation)
 
-```
-prism/
-├── README.md                           # Main Project Overview & Documentation
-├── LICENSE                             # MIT License
-├── .gitignore                          # Git Ignore Rules
-├── db/                                 # Database Migration Schemas
-│   └── migrations/
-│       ├── 001_init_schema.sql         # Relational Tables (Regions, Subscribers, Alerts)
-│       └── 002_hypertables.sql         # TimescaleDB Time-Series Hypertables
-├── docs/                               # Project Documentation & Pitch Blueprint
-│   ├── research-notes.md               # Space Physics & Scintillation Validation Brief
-│   ├── data-sources.md                 # Public Open Data API Specifications
-│   ├── pitch-deck-outline.md           # 9-Slide Presentation Blueprint
-│   └── devpost-submission-draft.md     # Devpost Form Narrative Draft
-├── services/                           # Microservices
-│   ├── science-engine/                 # Python Space-Weather Analytics (FastAPI)
-│   ├── alert-service/                  # Go Polling & SMS Dispatch Engine
-│   └── dashboard/                      # Grafana Provisioning & Risk Heatmap
-└── infra/                              # Infrastructure Deployment Specs
-    ├── docker-compose.yml              # Complete Multi-Container Orchestration
-    └── .env.example                    # Environment Variables Blueprint
+Run the end-to-end CME solar storm simulation and AI predictive forecast directly in your terminal with zero configuration:
+
+```bash
+# Clone the repository & run the interactive simulator
+git clone https://github.com/AdeshDeshmukh/prism.git
+cd prism
+python demo_storm.py
 ```
 
 ---
 
-## 🚀 Quick Start (Local Deployment)
+## 🚀 Full Stack Deployment (Docker Compose)
 
-Run the full PRISM stack locally with a single command using Docker Compose:
+Run the full PRISM microservices stack locally (Science Engine, Go Alert Poller, TimescaleDB, Grafana):
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/AdeshDeshmukh/prism.git
-cd prism
-
-# 2. Launch all microservices (TimescaleDB, Science Engine, Alert Service, Grafana)
 docker-compose -f infra/docker-compose.yml up --build
 ```
 
 ### Microservice Access Points
-* **Science Engine API:** `http://localhost:8000/docs`
-* **Grafana Dashboard:** `http://localhost:3000` (Credentials: `admin`/`admin`)
-* **TimescaleDB:** `localhost:5432` (`prism_db`)
+* **Science Engine API (FastAPI Swagger UI):** `http://localhost:8000/docs`
+* **Grafana Monitoring Dashboard:** `http://localhost:3000` (Credentials: `admin`/`admin`)
+* **TimescaleDB Time-Series Engine:** `localhost:5432` (`prism_db`)
 
 ---
 
